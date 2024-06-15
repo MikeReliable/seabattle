@@ -1,14 +1,28 @@
 package com.example.seaBattle.objects;
 
-public class square {
+import javax.persistence.*;
 
-    private final byte [][] square;
+@Entity
+@Table
+public class Field {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long fieldId;
+
     private byte coordinateX;
     private byte coordinateY;
     private byte status;
 
-    public square(byte[][] square) {
-        this.square = new byte[10][10];
+    public Field() {
+    }
+
+    public Long getFieldId() {
+        return fieldId;
+    }
+
+    public void setFieldId(Long fieldId) {
+        this.fieldId = fieldId;
     }
 
     public byte getCoordinateX() {
@@ -33,9 +47,5 @@ public class square {
 
     public void setStatus(byte status) {
         this.status = status;
-    }
-
-    public byte[][] getSquare() {
-        return square;
     }
 }
