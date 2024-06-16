@@ -11,6 +11,7 @@ public class Ship {
     private Long shipId;
 
     private byte length;
+    private boolean alive;
 
     public Ship() {
     }
@@ -29,5 +30,13 @@ public class Ship {
 
     public void setLength(byte length) {
         this.length = length;
+    }
+
+    public boolean isAlive() {
+        return alive;
+    }
+
+    public void setAlive(boolean alive) {
+        this.alive = alive;
     }
 }
