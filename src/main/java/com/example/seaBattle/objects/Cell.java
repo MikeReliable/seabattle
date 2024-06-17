@@ -15,8 +15,8 @@ public class Cell {
     private int coordinateY;
     private String status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="player_id", nullable=false)
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="player_id")
     private Player player;
 
     public Cell() {

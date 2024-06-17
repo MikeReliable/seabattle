@@ -11,7 +11,8 @@ public class Game {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long gameId;
 
-    private boolean active;
+    private Long whoseTurn;
+    private boolean inactive;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "game_player",
@@ -30,12 +31,20 @@ public class Game {
         this.gameId = gameId;
     }
 
-    public boolean isActive() {
-        return active;
+    public Long getWhoseTurn() {
+        return whoseTurn;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public boolean isInactive() {
+        return inactive;
+    }
+
+    public void setInactive(boolean inactive) {
+        this.inactive = inactive;
+    }
+
+    public void setWhoseTurn(Long whoseTurn) {
+        this.whoseTurn = whoseTurn;
     }
 
     public Set<Player> getPlayerSet() {

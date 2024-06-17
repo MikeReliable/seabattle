@@ -13,6 +13,12 @@ public class Ship {
     private byte length;
     private boolean alive;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinTable(name = "player_ship",
+            joinColumns = {@JoinColumn(name = "ship_id", referencedColumnName = "shipId")},
+            inverseJoinColumns = {@JoinColumn(name = "player_id", referencedColumnName = "playerId")})
+    private Player player;
+
     public Ship() {
     }
 
