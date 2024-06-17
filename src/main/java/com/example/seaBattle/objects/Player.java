@@ -62,4 +62,12 @@ public class Player {
     public void setGame(Game game) {
         this.game = game;
     }
+
+    public Set<Ship> getShipSet() {
+        return shipSet;
+    }
+
+    public void setShipSet(Set<Ship> shipSet) {
+        this.shipSet = shipSet;
+    }
 }

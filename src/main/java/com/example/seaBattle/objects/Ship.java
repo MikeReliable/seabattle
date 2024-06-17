@@ -45,4 +45,12 @@ public class Ship {
     public void setAlive(boolean alive) {
         this.alive = alive;
     }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
 }
