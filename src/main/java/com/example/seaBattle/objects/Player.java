@@ -1,6 +1,7 @@
 package com.example.seaBattle.objects;
 
 import javax.persistence.*;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -22,7 +23,7 @@ public class Player {
             inverseJoinColumns = {@JoinColumn(name = "game_id", referencedColumnName = "gameId")})
     private Game game;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "player_ship",
             joinColumns = {@JoinColumn(name = "player_id", referencedColumnName = "playerId")},
             inverseJoinColumns = {@JoinColumn(name = "ship_id", referencedColumnName = "shipId")})
@@ -69,5 +70,18 @@ public class Player {
 
     public void setShipSet(Set<Ship> shipSet) {
         this.shipSet = shipSet;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return Objects.equals(playerId, player.playerId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(playerId);
     }
 }

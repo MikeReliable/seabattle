@@ -1,6 +1,7 @@
 package com.example.seaBattle.objects;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table
@@ -18,6 +19,9 @@ public class Ship {
             joinColumns = {@JoinColumn(name = "ship_id", referencedColumnName = "shipId")},
             inverseJoinColumns = {@JoinColumn(name = "player_id", referencedColumnName = "playerId")})
     private Player player;
+
+    @OneToMany(mappedBy = "ship", cascade = CascadeType.ALL)
+    private Set<Cell> cellSet;
 
     public Ship() {
     }

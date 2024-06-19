@@ -19,6 +19,10 @@ public class Cell {
     @JoinColumn(name="player_id")
     private Player player;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="ship_id")
+    private Ship ship;
+
     public Cell() {
     }
 

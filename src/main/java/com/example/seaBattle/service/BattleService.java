@@ -37,11 +37,11 @@ public class BattleService {
         playerRepo.save(player);
         Set<Cell> cells = new HashSet<>();
         int fieldSize = 10;
-        for (int i = 0; i < fieldSize; i++) {
+        for (int i = fieldSize; i > 0; i--) {
             for (int j = 0; j < fieldSize; j++) {
                 Cell cell = new Cell();
-                cell.setCoordinateX(i + 1);
-                cell.setCoordinateY(j + 1);
+                cell.setCoordinateY(i);
+                cell.setCoordinateX(j + 1);
                 cell.setStatus("*");
                 cell.setPlayer(player);
                 cells.add(cell);
@@ -52,7 +52,7 @@ public class BattleService {
         return player;
     }
 
-    public Player findPlayerById(Long playerId){
-        return playerRepo.findByPlayerId(playerId);
+    public Player findPlayerByPlayerIdAndGameGameId(Long playerId, Long gameId) {
+        return playerRepo.findPlayerByPlayerIdAndGameGameId(playerId, gameId);
     }
 }
