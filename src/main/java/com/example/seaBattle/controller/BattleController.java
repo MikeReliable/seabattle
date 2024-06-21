@@ -10,7 +10,12 @@ import com.example.seaBattle.repos.PlayerRepo;
 import com.example.seaBattle.repos.ShipRepo;
 import com.example.seaBattle.service.BattleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class BattleController {
@@ -74,53 +79,65 @@ public class BattleController {
                     ship.setAlive(true);
                     ship.setLength(length);
                     if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY) != null) {
+                        Cell cell;
+                        List<Cell> shipSides = new ArrayList<>();
                         if (horizontal) {
-                            Cell cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY);
-                            cell.setStatus("-");
-                            cellRepo.save(cell);
                             if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + length - 1, coordinateY) != null) {
                                 for (int i = 0; i < length; i++) {
-                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY);
-                                    cell.setStatus("x");
-                                    cellRepo.save(cell);
-                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY - 1);
-                                    cell.setStatus("-");
-                                    cellRepo.save(cell);
-                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY + 1);
-                                    cell.setStatus("-");
-                                    cellRepo.save(cell);
-                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY);
-                                    cell.setStatus("-");
-                                    cellRepo.save(cell);
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY) != null) {
+                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY);
+                                        findShipsIntersections(cell, shipSides);
+                                    }
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY) != null) {
+                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY);
+                                        findShipsContacts(cell, shipSides);
+                                    }
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY - 1) != null) {
+                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY - 1);
+                                        findShipsContacts(cell, shipSides);
+                                    }
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY + 1) != null) {
+                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY + 1);
+                                        findShipsContacts(cell, shipSides);
+                                    }
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY) != null) {
+                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY);
+                                        findShipsContacts(cell, shipSides);
+                                    }
                                 }
                                 actualPlayer.getShipSet().add(ship);
                                 playerRepo.save(actualPlayer);
-                                return "ok";
+                                return "Корабль успешно установлен";
                             } else {
                                 System.out.println("Корабль не может выходить за пределы поля 10х10");
                             }
                         } else {
                             if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + length - 1) != null) {
-                                Cell cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + 1);
-                                cell.setStatus("-");
-                                cellRepo.save(cell);
                                 for (int i = 0; i < length; i++) {
-                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i);
-                                    cell.setStatus("x");
-                                    cellRepo.save(cell);
-                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY - i);
-                                    cell.setStatus("-");
-                                    cellRepo.save(cell);
-                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY - i);
-                                    cell.setStatus("-");
-                                    cellRepo.save(cell);
-                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i - 1);
-                                    cell.setStatus("-");
-                                    cellRepo.save(cell);
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i) != null) {
+                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i);
+                                        findShipsIntersections(cell, shipSides);
+                                    }
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i + 1) != null) {
+                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i + 1);
+                                        findShipsContacts(cell, shipSides);
+                                    }
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY - i) != null) {
+                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY - i);
+                                        findShipsContacts(cell, shipSides);
+                                    }
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY - i) != null) {
+                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY - i);
+                                        findShipsContacts(cell, shipSides);
+                                    }
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i - 1) != null) {
+                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i - 1);
+                                        findShipsContacts(cell, shipSides);
+                                    }
                                 }
                                 actualPlayer.getShipSet().add(ship);
                                 playerRepo.save(actualPlayer);
-                                return "ok";
+                                return "Корабль успешно установлен";
                             } else {
                                 System.out.println("Корабль не может выходить за пределы поля 10х10");
                             }
@@ -132,5 +149,31 @@ public class BattleController {
             return "Игрок не найден";
         }
         return "Игра не найдена";
+    }
+
+    private void findShipsIntersections(Cell cell, List<Cell> shipSides) {
+        if (cell.getStatus().equals("*")) {
+            cell.setStatus("x");
+            cellRepo.save(cell);
+            shipSides.add(cell);
+        } else {
+            for (Cell shipSide : shipSides) {
+                shipSide.setStatus("*");
+                System.out.println("Корабли не могуг соприкасаться");
+            }
+        }
+    }
+
+    private void findShipsContacts(Cell cell, List<Cell> shipSides) {
+        if (cell.getStatus().equals("*")) {
+            cell.setStatus("-");
+            cellRepo.save(cell);
+            shipSides.add(cell);
+        } else {
+            for (Cell shipSide : shipSides) {
+                shipSide.setStatus("*");
+                System.out.println("Корабли не могуг соприкасаться");
+            }
+        }
     }
 }
