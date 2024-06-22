@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -241,18 +242,24 @@ public class BattleService {
 
     public String makeShoot(Long gameId, Long playerId, int coordinateX, int coordinateY) {
         if (gameRepo.findById(gameId).isPresent()) {
+            Game game = gameRepo.findByGameId(gameId);
             if (findPlayerByPlayerIdAndGameGameId(playerId, gameId) != null) {
+                Player actualPlayer = playerRepo.findDistinctByPlayerIdAndGameGameId(playerId, gameId);
                 Player actualPlayerEnemy = findPlayerByPlayerIdAndGameGameId(playerId, gameId);
                 if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayerEnemy, coordinateX, coordinateY) != null) {
                     Cell cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayerEnemy, coordinateX, coordinateY);
                     if (!cell.getStatus().equals("x")) {
                         cell.setStatus("0");
                         cellRepo.save(cell);
+                        game.setWhoseTurn(actualPlayerEnemy.getPlayerId());
+                        gameRepo.save(game);
                         return "Мимо!";
                     } else {
                         if (!cell.getStatus().equals("-")) {
                             cell.setStatus("0");
                             cellRepo.save(cell);
+                            game.setWhoseTurn(actualPlayerEnemy.getPlayerId());
+                            gameRepo.save(game);
                             return "Мимо!";
                         } else {
                             cell.setStatus("+");
@@ -270,11 +277,19 @@ public class BattleService {
                                 totalLength += ship1.getLength();
                             }
                             if (totalLength != 0 && ship.isAlive()) {
+                                game.setWhoseTurn(actualPlayer.getPlayerId());
+                                gameRepo.save(game);
                                 return "Ранен!";
                             } else {
                                 if (totalLength != 0 && !ship.isAlive()) {
+                                    game.setWhoseTurn(actualPlayer.getPlayerId());
+                                    gameRepo.save(game);
                                     return "Убит!";
                                 } else {
+                                    actualPlayer.setWinner(true);
+                                    playerRepo.save(actualPlayer);
+                                    game.setInactive(true);
+                                    gameRepo.save(game);
                                     return "Победа!";
                                 }
                             }
