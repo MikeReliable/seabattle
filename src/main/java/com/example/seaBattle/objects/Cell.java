@@ -16,11 +16,11 @@ public class Cell {
     private String status;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="player_id")
+    @JoinColumn(name = "player_id")
     private Player player;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="ship_id")
+    @JoinColumn(name = "ship_id")
     private Ship ship;
 
     public Cell() {

@@ -37,10 +37,9 @@ public class BattleController {
 
     @PostMapping(path = "/shoot")
     public String shoot(@RequestParam Long gameId,
-                          @RequestParam Long playerId,
-                          @RequestParam int coordinateX,
-                          @RequestParam int coordinateY) {
+                        @RequestParam Long playerId,
+                        @RequestParam int coordinateX,
+                        @RequestParam int coordinateY) {
         return battleService.makeShoot(gameId, playerId, coordinateX, coordinateY);
     }
-
 }

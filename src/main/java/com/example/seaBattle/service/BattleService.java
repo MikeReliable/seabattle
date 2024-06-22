@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -87,116 +86,118 @@ public class BattleService {
                         length = 1;
                         break;
                 }
-                if (actualPlayer.getShipSet().size() < 10) {
-                    Ship ship = new Ship();
-                    ship.setAlive(true);
-                    ship.setLength(length);
-                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY) != null) {
-                        Cell cell;
-                        Set<Cell> shipSides = new HashSet<>();
-                        if (horizontal) {
-                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + length - 1, coordinateY) != null) {
-                                boolean setShip = true;
-                                for (int i = 0; i < length; i++) {
-                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY) != null) {
-                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY);
-                                        if (findShipsIntersections(cell, shipSides)) {
-                                            setShip = false;
-                                            break;
+                if (1 <= coordinateX && coordinateX <= 10 && 1 <= coordinateY && coordinateY <= 10) {
+                    if (actualPlayer.getShipSet().size() < 10) {
+                        Ship ship = new Ship();
+                        ship.setAlive(true);
+                        ship.setLength(length);
+                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY) != null) {
+                            Cell cell;
+                            Set<Cell> shipSides = new HashSet<>();
+                            if (horizontal) {
+                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + length - 1, coordinateY) != null) {
+                                    boolean setShip = true;
+                                    for (int i = 0; i < length; i++) {
+                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY) != null) {
+                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY);
+                                            if (findShipsIntersections(cell, shipSides)) {
+                                                setShip = false;
+                                                break;
+                                            }
                                         }
-                                    }
-                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY) != null) {
-                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY);
-                                        if (findShipsContacts(cell, shipSides)) {
-                                            setShip = false;
-                                            break;
-                                        }
+                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY) != null) {
+                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY);
+                                            if (findShipsContacts(cell, shipSides)) {
+                                                setShip = false;
+                                                break;
+                                            }
 
-                                    }
-                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY - 1) != null) {
-                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY - 1);
-                                        if (findShipsContacts(cell, shipSides)) {
-                                            setShip = false;
-                                            break;
+                                        }
+                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY - 1) != null) {
+                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY - 1);
+                                            if (findShipsContacts(cell, shipSides)) {
+                                                setShip = false;
+                                                break;
+                                            }
+                                        }
+                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY + 1) != null) {
+                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY + 1);
+                                            if (findShipsContacts(cell, shipSides)) {
+                                                setShip = false;
+                                                break;
+                                            }
+                                        }
+                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY) != null) {
+                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY);
+                                            if (findShipsContacts(cell, shipSides)) {
+                                                setShip = false;
+                                                break;
+                                            }
                                         }
                                     }
-                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY + 1) != null) {
-                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY + 1);
-                                        if (findShipsContacts(cell, shipSides)) {
-                                            setShip = false;
-                                            break;
-                                        }
+                                    if (setShip) {
+                                        actualPlayer.getShipSet().add(ship);
+                                        playerRepo.save(actualPlayer);
+                                        return "Корабль успешно установлен";
                                     }
-                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY) != null) {
-                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY);
-                                        if (findShipsContacts(cell, shipSides)) {
-                                            setShip = false;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (setShip) {
-                                    actualPlayer.getShipSet().add(ship);
-                                    playerRepo.save(actualPlayer);
-                                    return "Корабль успешно установлен";
-                                }
-                            } else {
-                                return "Корабль не может выходить за пределы поля 10х10";
-                            }
-                        } else {
-                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + length - 1) != null) {
-                                boolean setShip = true;
-                                for (int i = 0; i < length; i++) {
-                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i) != null) {
-                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i);
-                                        if (findShipsIntersections(cell, shipSides)) {
-                                            setShip = false;
-                                            break;
-                                        }
-                                    }
-                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i + 1) != null) {
-                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i + 1);
-                                        if (findShipsContacts(cell, shipSides)) {
-                                            setShip = false;
-                                            break;
-                                        }
-                                    }
-                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY - i) != null) {
-                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY - i);
-                                        if (findShipsContacts(cell, shipSides)) {
-                                            setShip = false;
-                                            break;
-                                        }
-                                    }
-                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY - i) != null) {
-                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY - i);
-                                        if (findShipsContacts(cell, shipSides)) {
-                                            setShip = false;
-                                            break;
-                                        }
-                                    }
-                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i - 1) != null) {
-                                        cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i - 1);
-                                        if (findShipsContacts(cell, shipSides)) {
-                                            setShip = false;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (setShip) {
-                                    ship.setCellSet(shipSides);
-                                    actualPlayer.getShipSet().add(ship);
-                                    playerRepo.save(actualPlayer);
-                                    return "Корабль успешно установлен";
+                                } else {
+                                    return "Корабль не может выходить за пределы поля 10х10";
                                 }
                             } else {
-                                return "Корабль не может выходить за пределы поля 10х10";
+                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + length - 1) != null) {
+                                    boolean setShip = true;
+                                    for (int i = 0; i < length; i++) {
+                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i) != null) {
+                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i);
+                                            if (findShipsIntersections(cell, shipSides)) {
+                                                setShip = false;
+                                                break;
+                                            }
+                                        }
+                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i + 1) != null) {
+                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i + 1);
+                                            if (findShipsContacts(cell, shipSides)) {
+                                                setShip = false;
+                                                break;
+                                            }
+                                        }
+                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY - i) != null) {
+                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY - i);
+                                            if (findShipsContacts(cell, shipSides)) {
+                                                setShip = false;
+                                                break;
+                                            }
+                                        }
+                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY - i) != null) {
+                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY - i);
+                                            if (findShipsContacts(cell, shipSides)) {
+                                                setShip = false;
+                                                break;
+                                            }
+                                        }
+                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i - 1) != null) {
+                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i - 1);
+                                            if (findShipsContacts(cell, shipSides)) {
+                                                setShip = false;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    if (setShip) {
+                                        ship.setCellSet(shipSides);
+                                        actualPlayer.getShipSet().add(ship);
+                                        playerRepo.save(actualPlayer);
+                                        return "Корабль успешно установлен";
+                                    }
+                                } else {
+                                    return "Корабль не может выходить за пределы поля 10х10";
+                                }
                             }
                         }
                     }
-                    return "Заданная координата выходит за пределы поля 10х10";
+                    return "Все корабли игрока расставлены";
                 }
-                return "Все корабли игрока расставлены";
+                return "Заданная координата выходит за пределы поля 10х10";
             }
             return "Игрок не найден";
         }
