@@ -57,4 +57,12 @@ public class Ship {
     public void setPlayer(Player player) {
         this.player = player;
     }
+
+    public Set<Cell> getCellSet() {
+        return cellSet;
+    }
+
+    public void setCellSet(Set<Cell> cellSet) {
+        this.cellSet = cellSet;
+    }
 }
