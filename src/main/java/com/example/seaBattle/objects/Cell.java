@@ -65,4 +65,12 @@ public class Cell {
     public void setPlayer(Player player) {
         this.player = player;
     }
+
+    public Ship getShip() {
+        return ship;
+    }
+
+    public void setShip(Ship ship) {
+        this.ship = ship;
+    }
 }
