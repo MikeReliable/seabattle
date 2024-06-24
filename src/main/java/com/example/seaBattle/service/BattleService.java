@@ -237,15 +237,15 @@ public class BattleService {
                                                         break;
                                                     }
                                                 }
-                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY + i - 1) != null) {
-                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY + i - 1);
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY + i + 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY + i + 1);
                                                     if (findShipsContacts(cell, shipSides)) {
                                                         setShip = false;
                                                         break;
                                                     }
                                                 }
-                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY + i - 1) != null) {
-                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY + i - 1);
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY + i + 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY + i + 1);
                                                     if (findShipsContacts(cell, shipSides)) {
                                                         setShip = false;
                                                         break;
@@ -369,6 +369,7 @@ public class BattleService {
                 List<Cell> cellList = findPlayerByPlayerIdAndGameGameId(playerId, gameId).getCellList();
                 cellList.sort(Comparator.comparing(Cell::getCellId));
                 int count = 0;
+                System.out.println();
                 for (Cell cell : cellList) {
                     if (count < 9) {
                         System.out.print(cell.getStatus());
