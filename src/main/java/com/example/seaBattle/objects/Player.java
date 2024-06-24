@@ -1,6 +1,7 @@
 package com.example.seaBattle.objects;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -15,7 +16,7 @@ public class Player {
     private boolean winner;
 
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
-    private Set<Cell> cellSet;
+    private List<Cell> cellList;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinTable(name = "game_player",
@@ -48,12 +49,12 @@ public class Player {
         this.winner = winner;
     }
 
-    public Set<Cell> getCellSet() {
-        return cellSet;
+    public List<Cell> getCellList() {
+        return cellList;
     }
 
-    public void setCellSet(Set<Cell> cellSet) {
-        this.cellSet = cellSet;
+    public void setCellList(List<Cell> cellList) {
+        this.cellList = cellList;
     }
 
     public Game getGame() {
@@ -72,16 +73,4 @@ public class Player {
         this.shipSet = shipSet;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Player player = (Player) o;
-        return Objects.equals(playerId, player.playerId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(playerId);
-    }
 }

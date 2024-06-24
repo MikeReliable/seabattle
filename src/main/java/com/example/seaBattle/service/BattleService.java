@@ -11,8 +11,7 @@ import com.example.seaBattle.repos.ShipRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class BattleService {
@@ -44,9 +43,9 @@ public class BattleService {
     public Player playerActivate() {
         Player player = new Player();
         playerRepo.save(player);
-        Set<Cell> cells = new HashSet<>();
+        List<Cell> cells = new ArrayList<>();
         int fieldSize = 10;
-        for (int i = fieldSize; i > 0; i--) {
+        for (int i = 0; i < fieldSize; i++) {
             for (int j = 0; j < fieldSize; j++) {
                 Cell cell = new Cell();
                 cell.setCoordinateY(i);
@@ -56,164 +55,228 @@ public class BattleService {
                 cells.add(cell);
             }
         }
-        player.setCellSet(cells);
+        player.setCellList(cells);
         playerRepo.save(player);
         return player;
     }
 
     public String putPlayerShip(Long gameId, Long playerId, int coordinateX, int coordinateY, boolean horizontal) {
-        if (gameRepo.findById(gameId).isPresent()) {
-            if (findPlayerByPlayerIdAndGameGameId(playerId, gameId) != null) {
-                Player actualPlayer = findPlayerByPlayerIdAndGameGameId(playerId, gameId);
-                byte length = 0;
-                switch (actualPlayer.getShipSet().size()) {
-                    case 0:
-                        length = 4;
-                        break;
-                    case 1:
-                    case 2:
-                        length = 3;
-                        break;
-                    case 3:
-                    case 4:
-                    case 5:
-                        length = 2;
-                        break;
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 9:
-                        length = 1;
-                        break;
-                }
-                if (1 <= coordinateX && coordinateX <= 10 && 1 <= coordinateY && coordinateY <= 10) {
-                    if (actualPlayer.getShipSet().size() < 10) {
-                        Ship ship = new Ship();
-                        ship.setAlive(true);
-                        ship.setLength(length);
-                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY) != null) {
-                            Cell cell;
-                            Set<Cell> shipSides = new HashSet<>();
-                            if (horizontal) {
-                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + length - 1, coordinateY) != null) {
-                                    boolean setShip = true;
-                                    for (int i = 0; i < length; i++) {
-                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY) != null) {
-                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY);
-                                            if (findShipsIntersections(cell, shipSides)) {
-                                                setShip = false;
-                                                break;
+        if (gameRepo.findByGameId(gameId) != null) {
+            if (!gameRepo.findByGameId(gameId).isInactive()) {
+                if (findPlayerByPlayerIdAndGameGameId(playerId, gameId) != null) {
+                    Player actualPlayer = findPlayerByPlayerIdAndGameGameId(playerId, gameId);
+                    byte length = 0;
+                    switch (actualPlayer.getShipSet().size()) {
+                        case 0:
+                            length = 4;
+                            break;
+                        case 1:
+                        case 2:
+                            length = 3;
+                            break;
+                        case 3:
+                        case 4:
+                        case 5:
+                            length = 2;
+                            break;
+                        case 6:
+                        case 7:
+                        case 8:
+                        case 9:
+                            length = 1;
+                            break;
+                    }
+                    if (1 <= coordinateX && coordinateX <= 10 && 1 <= coordinateY && coordinateY <= 10) {
+                        if (actualPlayer.getShipSet().size() < 10) {
+                            Ship ship = new Ship();
+                            ship.setAlive(true);
+                            ship.setLength(length);
+                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY) != null) {
+                                Cell cell;
+                                Set<Cell> shipSides = new HashSet<>();
+                                Set<Cell> shipDecks = new HashSet<>();
+                                if (horizontal) {
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + length - 1, coordinateY) != null) {
+                                        boolean setShip = true;
+                                        for (int i = 0; i < length; i++) {
+                                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY) != null) {
+                                                cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY);
+                                                if (findShipsIntersections(cell, shipDecks)) {
+                                                    setShip = false;
+                                                    break;
+                                                }
                                             }
-                                        }
-                                        if (i == 0) {
-                                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY) != null) {
-                                                cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY);
+                                            if (i == 0) {
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY + 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY + 1);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY - 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i - 1, coordinateY - 1);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY - 1) != null) {
+                                                cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY - 1);
                                                 if (findShipsContacts(cell, shipSides)) {
                                                     setShip = false;
                                                     break;
                                                 }
                                             }
-                                        }
-                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY - 1) != null) {
-                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY - 1);
-                                            if (findShipsContacts(cell, shipSides)) {
-                                                setShip = false;
-                                                break;
-                                            }
-                                        }
-                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY + 1) != null) {
-                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY + 1);
-                                            if (findShipsContacts(cell, shipSides)) {
-                                                setShip = false;
-                                                break;
-                                            }
-                                        }
-                                        if (i == length - 1) {
-                                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY) != null) {
-                                                cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY);
+                                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY + 1) != null) {
+                                                cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i, coordinateY + 1);
                                                 if (findShipsContacts(cell, shipSides)) {
                                                     setShip = false;
                                                     break;
                                                 }
                                             }
+                                            if (i == length - 1) {
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY + 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY + 1);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY - 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + i + 1, coordinateY - 1);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                            }
                                         }
-                                    }
-                                    if (setShip) {
-                                        ship.setPlayer(actualPlayer);
-                                        ship.setCellSet(shipSides);
-                                        actualPlayer.setCellSet(shipSides);
-//                                        actualPlayer.getShipSet().add(ship);
-                                        shipRepo.save(ship);
-                                        return "Корабль успешно установлен";
+                                        if (setShip) {
+                                            ship.setPlayer(actualPlayer);
+                                            shipRepo.save(ship);
+                                            for (Cell shipSide : shipDecks) {
+                                                shipSide.setShip(ship);
+                                            }
+                                            playerRepo.save(actualPlayer);
+                                            return "Корабль успешно установлен";
+                                        } else {
+                                            return "Корабли не могуг соприкасаться";
+                                        }
                                     } else {
-                                        return "Корабли не могуг соприкасаться";
+                                        return "Корабль не может выходить за пределы поля 10х10";
                                     }
                                 } else {
-                                    return "Корабль не может выходить за пределы поля 10х10";
-                                }
-                            } else {
-                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + length - 1) != null) {
-                                    boolean setShip = true;
-                                    for (int i = 0; i < length; i++) {
-                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i) != null) {
-                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i);
-                                            if (findShipsIntersections(cell, shipSides)) {
-                                                setShip = false;
-                                                break;
+                                    if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + length - 1) != null) {
+                                        boolean setShip = true;
+                                        for (int i = 0; i < length; i++) {
+                                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + i) != null) {
+                                                cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + i);
+                                                if (findShipsIntersections(cell, shipDecks)) {
+                                                    setShip = false;
+                                                    break;
+                                                }
                                             }
-                                        }
-                                        if (i == 0) {
-                                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i + 1) != null) {
-                                                cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i + 1);
+                                            if (i == 0) {
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + i - 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + i - 1);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY + i - 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY + i - 1);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY + i - 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY + i - 1);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY + i) != null) {
+                                                cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY + i);
                                                 if (findShipsContacts(cell, shipSides)) {
                                                     setShip = false;
                                                     break;
                                                 }
                                             }
-                                        }
-                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY - i) != null) {
-                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY - i);
-                                            if (findShipsContacts(cell, shipSides)) {
-                                                setShip = false;
-                                                break;
-                                            }
-                                        }
-                                        if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY - i) != null) {
-                                            cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY - i);
-                                            if (findShipsContacts(cell, shipSides)) {
-                                                setShip = false;
-                                                break;
-                                            }
-                                        }
-                                        if (i == length - 1) {
-                                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i - 1) != null) {
-                                                cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY - i - 1);
+                                            if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY + i) != null) {
+                                                cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY + i);
                                                 if (findShipsContacts(cell, shipSides)) {
                                                     setShip = false;
                                                     break;
                                                 }
                                             }
+                                            if (i == length - 1) {
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + i + 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX, coordinateY + i + 1);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY + i - 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX + 1, coordinateY + i - 1);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                                if (cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY + i - 1) != null) {
+                                                    cell = cellRepo.findCellByPlayerAndCoordinateXAndCoordinateY(actualPlayer, coordinateX - 1, coordinateY + i - 1);
+                                                    if (findShipsContacts(cell, shipSides)) {
+                                                        setShip = false;
+                                                        break;
+                                                    }
+                                                }
+                                            }
                                         }
-                                    }
-                                    if (setShip) {
-                                        ship.setCellSet(shipSides);
-                                        actualPlayer.getShipSet().add(ship);
-                                        playerRepo.save(actualPlayer);
-                                        return "Корабль успешно установлен";
+                                        if (setShip) {
+                                            ship.setPlayer(actualPlayer);
+                                            shipRepo.save(ship);
+                                            for (Cell shipSide : shipDecks) {
+                                                shipSide.setShip(ship);
+                                            }
+                                            playerRepo.save(actualPlayer);
+                                            return "Корабль успешно установлен";
+                                        } else {
+                                            return "Корабли не могуг соприкасаться";
+                                        }
                                     } else {
-                                        return "Корабли не могуг соприкасаться";
+                                        return "Корабль не может выходить за пределы поля 10х10";
                                     }
-                                } else {
-                                    return "Корабль не может выходить за пределы поля 10х10";
                                 }
                             }
                         }
+                        return "Все корабли игрока расставлены";
                     }
-                    return "Все корабли игрока расставлены";
+                    return "Заданная координата выходит за пределы поля 10х10";
                 }
-                return "Заданная координата выходит за пределы поля 10х10";
+                return "Игрок не найден";
             }
-            return "Игрок не найден";
+            return "Игра окончена";
         }
         return "Игра не найдена";
     }
@@ -222,11 +285,11 @@ public class BattleService {
         return playerRepo.findPlayerByPlayerIdAndGameGameId(playerId, gameId);
     }
 
-    private boolean findShipsIntersections(Cell cell, Set<Cell> shipSides) {
+    private boolean findShipsIntersections(Cell cell, Set<Cell> shipDecks) {
         boolean reaction = false;
         if (cell.getStatus().equals("*")) {
             cell.setStatus("x");
-            shipSides.add(cell);
+            shipDecks.add(cell);
         } else {
             reaction = true;
         }
@@ -260,7 +323,7 @@ public class BattleService {
                         gameRepo.save(game);
                         return "Мимо!";
                     } else {
-                        Ship ship = shipRepo.findShipByCellSetContainsAndPlayer(cell, actualPlayerEnemy);
+                        Ship ship = shipRepo.findShipByCellListContainsAndPlayer(cell, actualPlayerEnemy);
                         byte length = (byte) (ship.getLength() - 1);
                         ship.setLength(length);
                         if (length == 0) {
@@ -298,7 +361,31 @@ public class BattleService {
         }
         return "Игра не найдена";
     }
+
+
+    public String getPlayerField(Long gameId, Long playerId) {
+        if (gameRepo.findById(gameId).isPresent()) {
+            if (findPlayerByPlayerIdAndGameGameId(playerId, gameId) != null) {
+                List<Cell> cellList = findPlayerByPlayerIdAndGameGameId(playerId, gameId).getCellList();
+                cellList.sort(Comparator.comparing(Cell::getCellId));
+                int count = 0;
+                for (Cell cell : cellList) {
+                    if (count < 9) {
+                        System.out.print(cell.getStatus());
+                        count++;
+                    } else {
+                        System.out.println(cell.getStatus());
+                        count = 0;
+                    }
+                }
+                return "ok";
+            }
+            return "Игрок не найден";
+        }
+        return "Игра не найдена";
+    }
 }
+
 // Обозначения на карте
 // Расстановка:
 // "*" - свободная клетка

@@ -1,6 +1,7 @@
 package com.example.seaBattle.objects;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table
@@ -19,7 +20,7 @@ public class Cell {
     @JoinColumn(name = "player_id")
     private Player player;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "ship_id")
     private Ship ship;
 
@@ -72,5 +73,18 @@ public class Cell {
 
     public void setShip(Ship ship) {
         this.ship = ship;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Cell cell = (Cell) o;
+        return Objects.equals(cellId, cell.cellId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cellId);
     }
 }

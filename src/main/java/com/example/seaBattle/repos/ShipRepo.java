@@ -6,5 +6,5 @@ import com.example.seaBattle.objects.Ship;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ShipRepo extends JpaRepository<Ship, Long> {
-    Ship findShipByCellSetContainsAndPlayer(Cell cell, Player player);
+    Ship findShipByCellListContainsAndPlayer(Cell cell, Player player);
 }

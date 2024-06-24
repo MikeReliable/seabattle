@@ -4,6 +4,7 @@ import com.example.seaBattle.objects.Game;
 import com.example.seaBattle.repos.GameRepo;
 import com.example.seaBattle.service.BattleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,5 +43,11 @@ public class BattleController {
                         @RequestParam int coordinateX,
                         @RequestParam int coordinateY) {
         return battleService.makeShoot(gameId, playerId, enemyId, coordinateX, coordinateY);
+    }
+
+    @GetMapping(path = "/playerField")
+    public String playerField(@RequestParam Long gameId,
+                              @RequestParam Long playerId) {
+        return battleService.getPlayerField(gameId, playerId);
     }
 }

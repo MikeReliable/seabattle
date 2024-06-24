@@ -1,6 +1,7 @@
 package com.example.seaBattle.objects;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -20,8 +21,8 @@ public class Ship {
             inverseJoinColumns = {@JoinColumn(name = "player_id", referencedColumnName = "playerId")})
     private Player player;
 
-    @OneToMany(mappedBy = "ship", cascade = CascadeType.ALL)
-    private Set<Cell> cellSet;
+    @OneToMany(mappedBy = "ship")
+    private List<Cell> cellList;
 
     public Ship() {
     }
@@ -58,11 +59,11 @@ public class Ship {
         this.player = player;
     }
 
-    public Set<Cell> getCellSet() {
-        return cellSet;
+    public List<Cell> getCellList() {
+        return cellList;
     }
 
-    public void setCellSet(Set<Cell> cellSet) {
-        this.cellSet = cellSet;
+    public void setCellList(List<Cell> cellList) {
+        this.cellList = cellList;
     }
 }
